@@ -16,7 +16,7 @@ import com.ics342.labs.ui.theme.LabsTheme
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.ics342.labs.Person
+import com.squareup.moshi.adapter
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +27,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             LabsTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     Column() {
                         Text("${data[1].Id}")
                         Text("${data[1].familyName}")
@@ -48,11 +51,11 @@ private fun loadData(resources: Resources): String {
         .use { it.readText() }
 }
 
-private fun dataFromJsonString(json: String): List<Person> {
+@OptIn(ExperimentalStdlibApi::class)
+private fun dataFromJsonString(json: String): List<Data> {
     val moshi: Moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
         .build()
-    val jsonAdapter: JsonAdapter<List<Person>> = moshi.adapter<List<Person>>(
-        List::class.java)
+    val jsonAdapter: JsonAdapter<List<Data>> = moshi.adapter()
     return jsonAdapter.fromJson(json) ?: listOf()
 }
