@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
         val data = dataFromJsonString(jsonData)
         setContent {
             LabsTheme {
-                // A surface container using the 'background' color from the theme
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -37,9 +37,7 @@ class MainActivity : ComponentActivity() {
                             Text("Age: ${dataItem.Age}")
                             Text("ID: ${dataItem.Id}")
                         }
-                    }
-
-
+                    }     
                 }
             }
         }
