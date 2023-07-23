@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -33,10 +34,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             var hasPermission by remember { mutableStateOf(false)}// state for tracking if the permission has been granted
             var showPermissionRationale by remember { mutableStateOf(false) }// state for tracking if the rationale should be shown
-            val context = LocalContext.current
+            var context = LocalContext.current
 
              // The ManagedActivityResultLauncher for handling requesting permission
-            val launcher = rememberLauncherForActivityResult(
+            var launcher = rememberLauncherForActivityResult(
                 contract = RequestPermission()
             ){ granted ->
                   if (granted) hasPermission = true
@@ -45,34 +46,33 @@ class MainActivity : ComponentActivity() {
 
             LabsTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        // if permission has been granted, show the LocationView
-                        if (hasPermission){
-                            LocationView()
-                        }
-                        // else if permission has not been granted, show a button to to request permission
-                        else{
-                            Button(onClick = {
-                                checkOrRequestPermission(context, launcher){ hasPermission= true }
-                            }) {
-                                Text("Request Permission")
-                            }
-                        }
+                        Log.d("Permission = ", hasPermission.toString())
+
+                        if (hasPermission) LocationView()
+
+                        else ShowRequestPermissionButton(context, launcher) { hasPermission = it }
+
+                        Log.d("Permission = ", hasPermission.toString())
+
                         // if user has denied permission and we should show the rationale, show the dialog
                         if(showPermissionRationale){
                             PermissionRationaleDialog(
                                 onConfirm = {
                                     showPermissionRationale = false
-                                    checkOrRequestPermission(context, launcher ){ hasPermission=true }
+                                    checkOrRequestPermission(context, launcher){
+                                        hasPermission=true
+                                    }
                                 }) {
                                 showPermissionRationale = false
                             }
                         }
-                        // --------
-                        //if(){
+                        Log.d("Permission = ", hasPermission.toString())
 
-                       // }
                     }
                 }
             }
@@ -80,6 +80,19 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Composable
+fun ShowRequestPermissionButton(
+    context:Context,
+    launcher:ManagedActivityResultLauncher<String, Boolean>,
+    onPermissionChange: (Boolean) -> Unit){
+    Button(onClick = {
+        checkOrRequestPermission(context, launcher){
+            onPermissionChange(true)
+        }
+    }) {
+        Text("Request Permission")
+    }
+}
 @Composable
 private fun LocationView() {
     Text("Has Location Permission")
@@ -122,9 +135,8 @@ private fun checkOrRequestPermission(
 
     if (permissionCheckResult == PackageManager.PERMISSION_GRANTED)
         permissionGranted()
-
-    // otherwise, launch the launcher for the permission
-    launcher.launch(permission)
+    else     // otherwise, launch the launcher for the permission
+        launcher.launch(permission)
 }
 
 
