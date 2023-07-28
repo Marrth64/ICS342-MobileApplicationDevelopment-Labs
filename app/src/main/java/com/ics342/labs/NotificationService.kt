@@ -1,12 +1,15 @@
 package com.ics342.labs
 
 import android.Manifest.permission
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -35,15 +38,23 @@ class NotificationService: Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-
-       // Build notification
-        var builder = NotificationCompat.Builder(this,CHANNEL_ID)
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent:PendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        // Build notification
+        var builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.star)
-            .setContentTitle("Alert")
-            .setContentText("Hello egrfreg")
+            .setContentTitle(R.string.app_name.toString())
+            .setContentText(R.string.desc_name.toString())
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-        TODO("Build and show notification")
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
         with(notificationManager){
             notify(NOTIFICATION_ID, builder.build())
         }
@@ -55,19 +66,19 @@ class NotificationService: Service() {
         return null
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     private fun createNotificationChannel() {
-       // TODO("Create notification channel and register with the system")
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.0){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val name = getString(R.string.app_name)
-            val desc = getString(R.string.app_name)
+            val desc = getString(R.string.desc_name)
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply{
                 description = desc
             }
+            val notificationManager:NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
-        val notificationManager:NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
     }
 
     companion object {

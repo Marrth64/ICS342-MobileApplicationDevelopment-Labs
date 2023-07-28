@@ -1,11 +1,14 @@
 package com.ics342.labs
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -28,20 +31,21 @@ import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.ics342.labs.ui.theme.LabsTheme
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("ObsoleteSdkInt")
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             var hasPermission by remember { mutableStateOf(false) }
             val context = LocalContext.current
+            // Log.d("CONTEXT ", context.toString())
             val launcher = rememberLauncherForActivityResult(RequestPermission()) {
-                if (it) {
-                    startNotificationService(context)
-                }
+                if (it) startNotificationService(context)
             }
             LabsTheme {
                 // A surface container using the 'background' color from the theme
@@ -49,7 +53,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Button(
                             onClick = {
                                 checkOrRequestPermission(
@@ -68,22 +75,56 @@ class MainActivity : ComponentActivity() {
 }
 
 fun startNotificationService(context: Context) {
-    TODO("Start the Notification Service")
+    var notificationService = NotificationService()
+    notificationService.onStartCommand()
 }
 
+@SuppressLint("ObsoleteSdkInt")
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 private fun checkOrRequestPermission(
     context: Context,
     launcher: ManagedActivityResultLauncher<String, Boolean>,
     permissionGranted: () -> Unit
 ) {
-    if (
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED) {
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+        == PackageManager.PERMISSION_GRANTED)
         permissionGranted()
-    } else {
+     else
         launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+
+}
+
+@Composable
+fun lab8(context:Context, launcher:ManagedActivityResultLauncher<String, Boolean>){
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Button(
+            onClick = {
+                checkOrRequestPermission(
+                    context,
+                    launcher
+                ) { startNotificationService(context) }
+            }
+        ) {
+            Text("Show Notification")
+        }
+    }
+}
+
+@Preview
+@Composable
+fun lab8Preview(){
+    var hasPermission by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(RequestPermission()) {
+        if (it) startNotificationService(context)
+    }
+    LabsTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            lab8(context,launcher)
+        }
     }
 }
