@@ -75,8 +75,8 @@ class MainActivity : ComponentActivity() {
 }
 
 fun startNotificationService(context: Context) {
-    var notificationService = NotificationService()
-    notificationService.onStartCommand()
+    val intent = Intent(context, NotificationService::class.java)
+    context.startService(intent)
 }
 
 @SuppressLint("ObsoleteSdkInt")

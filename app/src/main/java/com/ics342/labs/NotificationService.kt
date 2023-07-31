@@ -19,8 +19,8 @@ import java.util.UUID
 
 class NotificationService: Service() {
 
-    private val notificationManager: NotificationManagerCompat =
-        NotificationManagerCompat.from(this)
+   // private val notificationManager: NotificationManagerCompat =
+    //    NotificationManagerCompat.from(this)
 
     override fun onCreate() {
         super.onCreate()
@@ -39,7 +39,7 @@ class NotificationService: Service() {
             return START_NOT_STICKY
         }
         val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         val pendingIntent:PendingIntent = PendingIntent.getActivity(
             this,
@@ -50,12 +50,12 @@ class NotificationService: Service() {
         // Build notification
         var builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.star)
-            .setContentTitle(R.string.app_name.toString())
-            .setContentText(R.string.desc_name.toString())
+            .setContentTitle("Hello World"/*R.string.app_name.toString()*/)
+            .setContentText("gdhffghdsdghfdfgh"/*R.string.desc_name.toString()*/)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-        with(notificationManager){
+        with(NotificationManagerCompat.from(this)){
             notify(NOTIFICATION_ID, builder.build())
         }
         return START_STICKY_COMPATIBILITY
@@ -69,8 +69,8 @@ class NotificationService: Service() {
     @SuppressLint("ObsoleteSdkInt")
     private fun createNotificationChannel() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val name = getString(R.string.app_name)
-            val desc = getString(R.string.desc_name)
+            val name = "Hello World"//R.string.app_name.toString()
+            val desc = "GSHFDsfgdsfgd"//R.string.desc_name.toString()
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply{
                 description = desc
